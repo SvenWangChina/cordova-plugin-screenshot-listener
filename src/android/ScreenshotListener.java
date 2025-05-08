@@ -12,6 +12,15 @@ public class ScreenshotListener extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
         if ("start".equals(action)) {
             startWatching(callbackContext);
+            // Pass in the callback created in the previous step 
+            // and the intended callback executor (e.g. Activity's mainExecutor).
+            // registerScreenCaptureCallback(executor, new Activity.ScreenCaptureCallback() {
+            //     @Override
+            //     public void onScreenCaptured() {
+            //         // Add logic to take action in your app.
+            //         callbackContext.success()
+            //     }
+            // });
 
             return true;
         }
@@ -27,11 +36,11 @@ public class ScreenshotListener extends CordovaPlugin {
             @Override
             public void onEvent(int event, String file) {
                 if (file != null) {
+                    callbackContext.success();
                     webView.getEngine().evaluateJavascript("cordova.fireDocumentEvent('screenshotTaken');", null);
                 }
             }
         };
         observer.startWatching();
-        callbackContext.success("Watching started");
     }
 }
