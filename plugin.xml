@@ -1,0 +1,14 @@
+<plugin id="cordova-plugin-screenshot-listener" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>ScreenshotListener</name>
+    <js-module src="www/ScreenshotListener.js" name="ScreenshotListener">
+        <clobbers target="ScreenshotListener" />
+    </js-module>
+
+    <platform name="android">
+        <source-file src="src/android/ScreenshotListener.java" target-dir="src/com/example/screenshotlistener" />
+    </platform>
+
+    <platform name="ios">
+        <source-file src="src/ios/ScreenshotListener.m" />
+    </platform>
+</plugin>
