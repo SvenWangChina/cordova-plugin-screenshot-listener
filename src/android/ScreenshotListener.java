@@ -36,11 +36,12 @@ public class ScreenshotListener extends CordovaPlugin {
             @Override
             public void onEvent(int event, String file) {
                 if (file != null) {
-                    callbackContext.success();
                     webView.getEngine().evaluateJavascript("cordova.fireDocumentEvent('screenshotTaken');", null);
                 }
             }
         };
         observer.startWatching();
+        callbackContext.success(path);
+
     }
 }
