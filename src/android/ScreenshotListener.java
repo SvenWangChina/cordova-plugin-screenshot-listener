@@ -1,26 +1,29 @@
 package com.example.screenshotlistener;
 
-import android.os.FileObserver;
-import org.apache.cordova.*;
+import android.content.Context;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.util.Log;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebViewImpl;
+
 import org.json.JSONArray;
-import java.io.File;
+import org.json.JSONException;
 
 public class ScreenshotListener extends CordovaPlugin {
-    private FileObserver observer;
+    private ScreenshotContentObserver observer;
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if ("start".equals(action)) {
-            startWatching(callbackContext);
-            // Pass in the callback created in the previous step 
-            // and the intended callback executor (e.g. Activity's mainExecutor).
-            // registerScreenCaptureCallback(executor, new Activity.ScreenCaptureCallback() {
-            //     @Override
-            //     public void onScreenCaptured() {
-            //         // Add logic to take action in your app.
-            //         callbackContext.success()
-            //     }
-            // });
+            startObserver();
+            callbackContext.success("Screenshot observer started.");
 
             return true;
         }
@@ -28,20 +31,53 @@ public class ScreenshotListener extends CordovaPlugin {
         return false;
     }
 
-    private void startWatching(CallbackContext callbackContext) {
-        String path = android.os.Environment.getExternalStoragePublicDirectory(
-                android.os.Environment.DIRECTORY_PICTURES).getAbsolutePath() + "/Screenshots";
+    private void startObserver() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        observer = new ScreenshotContentObserver(handler, cordova.getActivity());
+        cordova.getActivity().getContentResolver().registerContentObserver(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                true,
+                observer
+        );
+    }
 
-        observer = new FileObserver(path, FileObserver.CREATE) {
-            @Override
-            public void onEvent(int event, String file) {
-                if (file != null) {
-                    webView.getEngine().evaluateJavascript("cordova.fireDocumentEvent('screenshotTaken');", null);
+    @Override
+    public void onDestroy() {
+        if (observer != null) {
+            cordova.getActivity().getContentResolver().unregisterContentObserver(observer);
+        }
+    }
+
+    static class ScreenshotContentObserver extends ContentObserver {
+        private Context context;
+
+        public ScreenshotContentObserver(Handler handler, Context context) {
+            super(handler);
+            this.context = context;
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+
+            Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED},
+                    null,
+                    null,
+                    MediaStore.Images.Media.DATE_ADDED + " DESC LIMIT 1"
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                cursor.close();
+
+                if (path != null && path.toLowerCase().contains("screenshot")) {
+                    Log.d("ScreenshotObserver", "Detected screenshot: " + path);
+                    ((CordovaWebViewImpl)((cordova.getActivity()).appView))
+                            .getEngine().evaluateJavascript("cordova.fireDocumentEvent('screenshotTaken');", null);
                 }
             }
-        };
-        observer.startWatching();
-        callbackContext.success(path);
-
+        }
     }
 }
