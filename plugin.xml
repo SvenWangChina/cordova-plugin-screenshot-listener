@@ -6,9 +6,21 @@
 
     <platform name="android">
         <source-file src="src/android/ScreenshotListener.java" target-dir="src/com/example/screenshotlistener" />
+        <config-file target="AndroidManifest.xml" parent="application">
+        </config-file>
+        <config-file target="config.xml" parent="/*">
+            <feature name="ScreenshotListener">
+                <param name="android-package" value="com.example.screenshotlistener.ScreenshotListener" />
+            </feature>
+        </config-file>
     </platform>
 
     <platform name="ios">
         <source-file src="src/ios/ScreenshotListener.m" />
+        <config-file target="config.xml" parent="/*">
+            <feature name="ScreenshotListener">
+                <param name="ios-package" value="ScreenshotListener" />
+            </feature>
+        </config-file>
     </platform>
 </plugin>

@@ -12,8 +12,10 @@ public class ScreenshotListener extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
         if ("start".equals(action)) {
             startWatching(callbackContext);
+
             return true;
         }
+
         return false;
     }
 
