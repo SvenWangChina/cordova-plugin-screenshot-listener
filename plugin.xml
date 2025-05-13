@@ -1,26 +1,36 @@
-<plugin id="cordova-plugin-screenshot-listener" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins" xmlns:android="http://schemas.android.com/apk/res/android">
-    <name>ScreenshotListener</name>
-    <js-module src="www/ScreenshotListener.js" name="ScreenshotListener">
-        <clobbers target="ScreenshotListener" />
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+        id="cordova-plugin-screenshot"
+        version="1.0.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>ScreenshotDetector</name>
+    <js-module name="ScreenshotDetector" src="www/ScreenshotDetector.js">
+        <clobbers target="ScreenshotDetector" />
     </js-module>
-
+    
+    <!-- Android -->
     <platform name="android">
-        <source-file src="src/android/ScreenshotListener.java" target-dir="src/com/example/screenshotlistener" />
-        <config-file target="AndroidManifest.xml" parent="application">
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
         </config-file>
-        <config-file target="config.xml" parent="/*">
-            <feature name="ScreenshotListener">
-                <param name="android-package" value="com.example.screenshotlistener.ScreenshotListener" />
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="ScreenshotDetector">
+                <param name="android-package" value="cordova.plugin.screenshot.ScreenshotDetector" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
+        <source-file src="src/android/ScreenshotDetector.java" target-dir="src/cordova/plugin/screenshot" />
     </platform>
-
+    
+    <!-- iOS -->
+	<!--
     <platform name="ios">
-        <source-file src="src/ios/ScreenshotListener.m" />
-        <config-file target="config.xml" parent="/*">
-            <feature name="ScreenshotListener">
-                <param name="ios-package" value="ScreenshotListener" />
+        <config-file parent="/*" target="config.xml">
+            <feature name="ScreenshotDetector">
+                <param name="ios-package" value="ScreenshotDetector" />
             </feature>
         </config-file>
+        <source-file src="src/ios/ScreenshotDetector.m" />
+        <header-file src="src/ios/ScreenshotDetector.h" />
     </platform>
+	-->
 </plugin>
